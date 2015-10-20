@@ -1,33 +1,27 @@
 define([
-    'marionette',
-    'modules/routing',
-    'modules/data',
-    'modules/templating',
-    'views/seasons'
+    'marionette'
 ], function(
-    Marionette,
-    RoutingModule,
-    DataModule,
-    TemplatingModule,
-    SeasonsView
+    Marionette
 ) {
     'use strict';
 
-    var app = new Marionette.Application({
-        regions: {
-            main: '#main',
-            seasons: '#seasons'
-        },
-        onBeforeStart: function() {
-            this.module('Routing', RoutingModule);
-            this.module('Data', DataModule);
-            this.module('Templating', TemplatingModule);
-        },
+    Marionette.Renderer.render = function(template, data, view) {
+        return _.template(template, data);
+    };
+
+    Backbone.ajax = function(request) {
+        request.headers = {
+            'X-Auth-Token': '61be99dccfbd4f28836025edc912111d'
+        };
+        return Backbone.$.ajax.apply(Backbone.$, [request]);
+    };
+
+    var App = Marionette.Application.extend({
         onStart: function() {
-            this.seasons.show(new SeasonsView());
             Backbone.history.start();
         }
     });
 
+    var app = new App();
     return app;
 });

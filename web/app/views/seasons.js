@@ -1,19 +1,20 @@
 define([
-    'marionette'
+    'marionette',
+    'seasons',
+    'state'
 ], function(
-    Marionette
+    Marionette,
+    seasons,
+    sm
 ) {
     'use strict';
 
     var ChildView = Marionette.ItemView.extend({
         template: '<%- obj.caption %>',
         tagName: 'option',
-        modelEvents: {
-            'change': 'render'
-        },
         attributes: function() {
             return {
-                value: this.model.id
+                value: this.model.get('league')
             };
         }
     });
@@ -31,12 +32,12 @@ define([
             'select': 'select'
         },
         initialize: function() {
-            this.collection = require('app').Data.seasons;
+            this.collection = seasons;
         },
         onSubmit: function(event) {
             event.preventDefault();
-            var season = this.ui.select.val();
-            Backbone.history.navigate('season/' + season, true);
+            var league = this.ui.select.val();
+            sm.transition('league', {league: league});
         },
         onChange: function(event) {
             this.$el.submit();

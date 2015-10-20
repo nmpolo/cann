@@ -9,7 +9,9 @@ require.config({
 });
 
 require([
-    'app'
+    'app',
+    'states/default',
+    'states/table'
 ], function(
     app
 ) {

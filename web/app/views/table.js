@@ -11,11 +11,7 @@ define([
         tagName: 'tr',
         serializeData: function() {
             var data = this.model.toJSON();
-            var teamnames = [];
-            _.each(data.teams, function(team) {
-                teamnames.push(team.team);
-            });
-            data.teamnames = teamnames.join(', ');
+            data.teamnames = _.pluck(data.teams, 'teamName').join(', ');
             return data;
         },
         template: '<td><%- obj.points %></td><td><%- obj.teamnames %></td>'
@@ -25,43 +21,23 @@ define([
         template: Template,
         childView: ItemView,
         childViewContainer: 'tbody',
-        modelEvents: {
-            'sync': 'render',
-            'error': 'onError'
-        },
-        initialize: function(opts) {
-            var options = {reset: true, data: {}};
-            if (opts.matchday) {
-                options.data.matchday = opts.matchday;
-            }
-            this.model.fetch(options);
+        initialize: function() {
             this.collection = new Backbone.Collection();
         },
-        onRender: function() {
-            this.rankings();
-        },
-        onError: function() {
-            this.$('tbody').html('<tr><td colspan="2" class="danger">Error loading data</td></tr>');
-        },
-        rankings: function() {
-            var rankings = this.model.get('ranking');
-            if (!rankings) {
-                return;
-            }
-            var min = _.min(rankings, function(ranking) {
-                return ranking.points;
+        onBeforeShow: function() {
+            var standings = this.model.get('standing');
+            var min = _.min(standings, function(standing) {
+                return standing.points;
             }).points;
-            var max = _.max(rankings, function(ranking) {
-                return ranking.points;
+            var max = _.max(standings, function(standing) {
+                return standing.points;
             }).points;
-            this.collection.reset();
             var i;
             for (i = max; i >= min; i--) {
-                var model = {
-                    points: i
-                };
-                model.teams = _.where(rankings, {points: i});
-                this.collection.add(model);
+                this.collection.add({
+                    points: i,
+                    teams: _.where(standings, {points: i})
+                });
             }
         }
     });
